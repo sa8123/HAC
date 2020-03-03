@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.*;
 
 
 public class UDPServer 
@@ -37,20 +38,19 @@ public class UDPServer
 				
 				socket.receive(receivePacket);
 				// Note the time
-				String message = new String(receivePacket.getData());
 				InetAddress address = receivePacket.getAddress();
 				int port = receivePacket.getPort();
 				
-				System.out.println("Received message from client: " + message);
+				System.out.println("----Received message from client IP: " + address.getHostAddress());
                 System.out.println("Client IP:"+ address.getHostAddress());
                 System.out.println("Client port: "+ port);
                 
 				// Create client object with ip address, (time_of_receipt + 30sec) within which the next message is to be received
 				Calendar cal = Calendar.getInstance();
-				cal.add(Calendar.SECOND, 30) ;
+				System.out.println("Package was received at: --------------------" + cal.getTime().toString());
 				
-				System.out.println("Current time: " + Calendar.getInstance().getTime().toString());
-				System.out.println("Wait till   : " + cal.getTime().toString());
+				cal.add(Calendar.SECOND, 30) ;
+				System.out.println("Maximum wait_time from the same client till: " + cal.getTime().toString());
 				
 				Client newClient = new Client(address, cal);
 				//Run over the arraylist to see if the client with IP address is there, if not:
@@ -102,6 +102,7 @@ public class UDPServer
 				
 				for (int i = 0; i <network.size(); i++)
 				{
+					System.out.println("---------------------------");
 					System.out.println("Printing out the arraylist: ");
 					System.out.println("Client" + (i + 1) + "-----------: " + network.get(i).getIP());
 				}
@@ -116,10 +117,10 @@ public class UDPServer
 				for (int i = 0; i<network.size(); i++)
 				{
 					Calendar right_now = Calendar.getInstance();
-					System.out.println(right_now.getTime().toString());
+					//System.out.println(right_now.getTime().toString());
 					
 					int j = right_now.compareTo(network.get(i).getCal());
-					System.out.println(j);
+					//System.out.println(j);
 					if (j == 1)
 					{
 						System.out.println("Server did not hear back from the client" + network.get(i).getIP().getHostAddress());
