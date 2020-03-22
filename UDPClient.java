@@ -129,11 +129,14 @@ public class UDPClient
                         {
                             System.out.println("I am the fucking server now, everyone send me the data");
                             socket.close();
-                            for (int i = 0; i<network.size(); i++)
+                            
+                            boolean is_server_removed_from_clientList = false;
+                            for (int i = 0; (i<network.size()) && (is_server_removed_from_clientList = false) ; i++)
                             {
                                 if (network.get(i).getIP().equals(InetAddress.getLocalHost()))
                                 {
                                     network.remove(i);
+                                    is_server_removed_from_clientList = true;
                                 }
                             }
                             return;                        
