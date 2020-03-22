@@ -9,28 +9,22 @@ import java.util.List;
 
 public class UDPServer {
 	
-	private List<Client> network;
+    private List<Client> network;	
+    public UDPServer(List<Client> passed_net)
+    {
+        network = passed_net;
+    }
 	
-	public UDPServer(List<Client> passed_net)
+    public void executeServer()
+    {		 
+        try 
+        {
+            DatagramSocket socket = new DatagramSocket(1234);
+            socket.setSoTimeout(30000);
+            byte[] incomingData = new byte[1024];
 
-	{
-		network = passed_net;
-	}
-	
-	 public void executeServer()
-     {
-		 
-		 
-         try 
-
-         {
-        	 DatagramSocket socket = new DatagramSocket(1234);
-			socket.setSoTimeout(30000);
-
-			byte[] incomingData = new byte[1024];
-
-                        boolean is_first_data_received = false;
-			while(true) 
+            boolean is_first_data_received = false;
+            while(true) 
 
 			{
 
@@ -279,14 +273,12 @@ public class UDPServer {
 
 						network.remove(i); 
 
-					}
-
-					
+					}				
 
 				}//for-end
 
-		
-
+                                // Clear the buffer after every use
+         incomingData = new byte[1024];
 			}//(infinite while loop end)
 
 			
@@ -310,6 +302,8 @@ public class UDPServer {
 			e.printStackTrace();
 
 		} 
+         
+         
      }
 
 
