@@ -6,6 +6,9 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.Calendar;
 import java.util.List;
+import java.text.DateFormat;  
+import java.text.SimpleDateFormat;  
+import java.util.Date; 
 
 public class UDPServer {
 	
@@ -166,8 +169,29 @@ public class UDPServer {
 							System.out.println("Client not found in arraylist, so added");
 
 							network.add(new Client(address, cal, port));
-
-							
+                                                        
+                                                       SimpleDateFormat df = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+                                                      
+                                      
+                                                        
+                                                        StringBuilder sbf = new StringBuilder("new-");
+                                                        for (int s=0; s<network.size(); s++)
+                                                        {
+                                                            sbf.append(network.get(s).getIP().getHostAddress());
+                                                            sbf.append("%%");
+                                                            Date date = network.get(s).getCal().getTime();
+                                                            sbf.append(df.format(date));
+                                                            sbf.append("%%");
+                                                            sbf.append(network.get(i).getPort());
+                                                            if (s!=(network.size()-1))
+                                                            {
+                                                                sbf.append("$$");
+                                                            }
+                                                        }
+							String r0 = sbf.toString();
+                                                        byte[] s0 = r0.getBytes();
+                                                        DatagramPacket sp0 = new DatagramPacket(s0, s0.length, address, port);
+                                                        socket.send(sp0);
 
 							String r1 = "add-" + newClient.getIP().getHostAddress() + "-" + newClient.getPort();
 

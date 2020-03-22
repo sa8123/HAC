@@ -18,6 +18,10 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Random;
 import java.net.*;
+import java.text.DateFormat;  
+import java.text.SimpleDateFormat;  
+import java.util.Date;
+import java.text.ParseException;
 
 
 public class UDPClient
@@ -83,9 +87,41 @@ public class UDPClient
                         try {
                             socket.receive(receivePacket);
                             hasConnectionEstablished = true;
+                            boolean isFirstResponse = true; 
                             String actualData = new String(receivePacket.getData());
                             
-                            if(actualData.substring(0,20).equals("I am your server! - "))
+                            if(actualData.substring(0,4).equals("new-") && isFirstResponse == true)
+                            {
+                                isFirstResponse = false;
+                                String[] strdiv = actualData.split("-");
+                                String useful_data = strdiv[1];
+                                String[] individual_clients = useful_data.split("$$");
+                                
+                                SimpleDateFormat df = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+                                
+                                for (int e=0; e<individual_clients.length;e++)
+                                {
+                                    String[] individualComponents = individual_clients[e].split("%%");
+                                    InetAddress ress = InetAddress.getByName(individualComponents[0]);
+                                    
+                                    
+                                     try{
+                                         Date date = df.parse(individualComponents[1]);
+                                         Calendar cale = Calendar.getInstance();
+                                                    cale.setTime(date);
+                                                    int prt = Integer.parseInt(individualComponents[2]);
+                                            
+                                    network.add(new Client(ress, cale, prt));
+                                               }
+                                                        catch (ParseException x)
+                                                                    {
+                                                        System.out.println("hahaha");
+                                                            }
+                                }
+                                
+                            }
+                            
+                            else if(actualData.substring(0,20).equals("I am your server! - "))
                             {
                         	  System.out.println("Server address changed");
                         	  for (int m = 0; m<network.size();m++)
@@ -131,7 +167,7 @@ public class UDPClient
                             socket.close();
                             
                             boolean is_server_removed_from_clientList = false;
-                            for (int i = 0; (i<network.size()) && (is_server_removed_from_clientList = false) ; i++)
+                            for (int i = 0; (i<network.size()) && (is_server_removed_from_clientList == false) ; i++)
                             {
                                 if (network.get(i).getIP().equals(InetAddress.getLocalHost()))
                                 {
