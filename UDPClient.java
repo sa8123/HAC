@@ -129,7 +129,13 @@ public class UDPClient
                         {
                             System.out.println("I am the fucking server now, everyone send me the data");
                             socket.close();
-                            network.remove(0);
+                            for (int i = 0; i<network.size(); i++)
+                            {
+                                if (network.get(i).getIP().equals(InetAddress.getLocalHost()))
+                                {
+                                    network.remove(i);
+                                }
+                            }
                             return;                        
                         }
          
