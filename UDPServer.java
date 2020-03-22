@@ -29,13 +29,13 @@ public class UDPServer {
 
 			byte[] incomingData = new byte[1024];
 
-                        boolean is_first_data_received = false;
+
 			while(true) 
 
 			{
 
 				// Declaring the socket to receive data and store the message in message.
-				if ((!network.isEmpty()) && (is_first_data_received == false)) {
+				if (network.size()!=0) {
 					String message = "I am your server! - " + InetAddress.getLocalHost().getHostAddress();
 					byte[] sendMessage = message.getBytes();
 					
@@ -53,7 +53,6 @@ public class UDPServer {
 				
 
 				socket.receive(receivePacket);
-                                is_first_data_received = true;
 
 				// Note the time
 
@@ -61,7 +60,9 @@ public class UDPServer {
 
 				int port = receivePacket.getPort();
 
-				String message = new String(receivePacket.getData());
+				String message = "";
+
+				message = new String(receivePacket.getData());
 
 				
 
@@ -98,8 +99,8 @@ public class UDPServer {
 				//System.out.print("11111111111111111111111111111111111111111111111111111111111111111");
 
 				
-
-				if (network.isEmpty())
+                                System.out.println("The network size is: " + network.size());
+				if (network.size() == 0)
 
 				{
 
@@ -151,7 +152,7 @@ public class UDPServer {
 
 						
 
-						if(network.get(i).getIP().equals(address))
+						if(network.get(i).getIP().equals(address) == true)
 
 						{
 
@@ -165,7 +166,7 @@ public class UDPServer {
 
 
 
-						else if((network.get(i).getIP().equals(address) == false) && visited_all == true)
+						else if((network.get(i).getIP().equals(address)) == false && visited_all == true)
 
 						{
 
@@ -265,15 +266,17 @@ public class UDPServer {
 
 						System.out.println("Response sent to update arraylist by removing.");
 
-						String r2 = "rmv-" + network.get(i).getIP().getHostAddress()+ "-" + newClient.getPort();
+						String r1 = "rmv-" + network.get(i).getIP().getHostAddress()+ "-" + newClient.getPort();
 
-						byte[] s2 = r2.getBytes();
+						byte[] s1 = r1.getBytes();
+
+						DatagramPacket sp = new DatagramPacket(s1, s1.length, address, port);
 
 						for (int k=0; k<network.size(); k++)
 
 						{
-                                                DatagramPacket spz = new DatagramPacket(s2, s2.length, network.get(k).getIP(), network.get(k).getPort());
-						socket.send(spz);
+
+						socket.send(sp);
 
 						}
 
