@@ -1,136 +1,222 @@
-package edu.truman.peertry;
-
+package edu.truman.p2p;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+
+import java.net.*;
+
 import java.util.ArrayList;
-import java.util.Scanner;
-import java.lang.Thread;
+import java.util.Calendar;
 
-public class Peer extends Thread
+
+import java.net.InetAddress;
+
+
+
+
+public class P2P 
+
 {
-	public Peer() 
-	{
-		startSeeding();
-	}
-	static ArrayList<String> clientInfo = new ArrayList<String>();
-	Thread peerStart = new Thread() 
-	{
-		public void run() 
-		{
-			System.out.println("I am from run method");
-			DatagramSocket socketPeer = null;
-			try 
-			{
-				System.out.println("I am from run method");
-				socketPeer = new DatagramSocket();
-			} 
-			catch (SocketException e) 
-			{
-				e.printStackTrace();
-			}
-			DatagramPacket packetPeer;
-			byte[] bytePeer = new byte[1024];
-			InetAddress address = null;
-			String messagePeer;
-			String ipAddress;
-			//String message = new String("Hello");
-			for(int i = 0; i < clientInfo.size(); i++) 
-			{
-				bytePeer = clientInfo.get(i).getBytes();
-				try 
-				{
-					address = InetAddress.getByName(clientInfo.get(i));
-				} 
-				catch (UnknownHostException e) 
-				{
-					
-					e.printStackTrace();
-				}
-				packetPeer = new DatagramPacket(bytePeer, bytePeer.length, address, 1234);
-				try 
-				{
-					socketPeer.send(packetPeer);
-				} 
-				catch (IOException e) 
-				{
-					e.printStackTrace();
-				}
-			}
-			
-		}
-	};
 
-	
-	
-	// It first acts as Server
-	public void startSeeding() 
-	{
-		DatagramSocket socket;
-		DatagramPacket receivedPacket;
-		byte[] receivedData = new byte[1024];
-		String actualData;
-		try 
-		{
-			socket = new DatagramSocket(1234);
-			receivedPacket = new DatagramPacket(receivedData, receivedData.length);
-			while(true) 
-			{
-				try 
-				{
-					System.out.println("I am from seeding");
-					socket.receive(receivedPacket);
-					actualData = new String(receivedPacket.getData().toString());
-					System.out.println("Seeding has started.");
-					System.out.println(actualData);
-					clientInfo.add(actualData);	
-					System.out.println(actualData);
-					peerStart.run();
-					//startPeering();
-				} 
-				catch (IOException e) 
-				{
-					e.printStackTrace();
-				}
-			}
-			
-		} 
-		catch (SocketException e) 
-		{
-			e.printStackTrace();
-		}
-		
-	}
-	
-	//If seeding is already done. 
-	
-	public static void main(String[] args) throws Exception
-	{
-		//clientInfo.add("192.168.0.71");
-		//clientInfo.add("192.168.0.77");
-		//clientInfo.add("192.168.0.76");
-		Scanner in = new Scanner(System.in);
-		System.out.println("Are you peer or server seeder?(P/S)");
-		String whoIs = in.nextLine();
-		if(whoIs.equals("P")) 
-		{
-			System.out.println("Enter the IP address");
-			String ip = in.nextLine();
-			System.out.println(ip);
-			clientInfo.add(ip);
-		}
-		else if(whoIs.equals("S")) 
-		{
-			InetAddress ip = InetAddress.getByName("localhost");
-			clientInfo.add(ip.toString());
-		}
-		Peer peer = new Peer();
-		peer.startSeeding();
-	}
+  public static ArrayList<Client> network = new ArrayList<Client>();
+  public static void main(String[] args) throws Exception 
+  {
+	InetAddress ad1 = InetAddress.getByName("192.168.0.71");
+	Calendar cal = Calendar.getInstance();
+	cal.add(Calendar.SECOND, 30) ;
 
+	network.add(new Client(ad1, cal)); //Client 1
 	
+	InetAddress ad2 = InetAddress.getByName("192.168.0.76");
+	network.add(new Client(ad2, cal)); //Client 2
+
+	InetAddress ad3 = InetAddress.getByName("192.168.0.77");
+	network.add(new Client(ad3, cal)); //Client 3
+
+	//InetAddress ad4 = InetAddress.getByName("150.243.17.224");
+	//network.add(new Client(ad4, cal)); //Client 4
+	
+    startServer();
+
+    startSender();
+
+  }
+
+
+
+  public static void startSender() throws UnknownHostException
+
+  {
+
+    (new Thread() 
+
+    {
+
+        @Override
+
+        public void run() 
+
+        {
+
+            byte data[] = "Client is up".getBytes();
+
+            DatagramSocket socket = null;
+
+            try 
+
+            {
+
+                socket = new DatagramSocket();
+
+                socket.setBroadcast(true);
+            } 
+
+            catch (SocketException ex) 
+
+            {
+
+                ex.printStackTrace();
+
+            }
+
+            while (true)
+
+            {
+
+	        	for (int j = 0; j < network.size(); j++) 
+
+	        	{
+
+	        		InetAddress ipAddress;
+
+					try 
+
+					{
+
+						ipAddress = network.get(j).getIP();
+						if(ipAddress != InetAddress.getLocalHost()) 
+						{
+							DatagramPacket sendPacket = new DatagramPacket(data,data.length,ipAddress,9876);
+				            socket.send(sendPacket);
+			                Thread.sleep(5000);
+						}
+
+					} 
+
+					catch (UnknownHostException e) 
+
+					{
+
+						System.out.println("Client " + (j + 1) + " is down.");
+
+					}
+
+					catch (IOException ex) 
+
+	                {
+
+						ex.printStackTrace();
+
+	                }
+
+					catch (InterruptedException e)
+
+					{
+
+						e.printStackTrace();
+
+					}
+
+	        	}
+
+            }
+
+        }
+
+        }).start();
+
+    }
+
+  public static void startServer() 
+
+  {
+
+    (new Thread() 
+
+    {
+
+        @Override
+
+        public void run() 
+
+        {
+
+                DatagramSocket seedSocket = null;
+                byte[] receiveData = new byte[1024];
+
+                try 
+
+                {
+
+                	seedSocket = new DatagramSocket(9876);
+
+                } 
+
+                catch (SocketException ex) 
+
+                {
+                    ex.printStackTrace();
+
+                }
+
+                DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                while (true) 
+
+                {
+                	try 
+
+                	{
+                		seedSocket.receive(receivePacket);
+	                    InetAddress address = receivePacket.getAddress();       
+	                    Calendar cal = Calendar.getInstance();
+	                    System.out.println("Message received from: " + receivePacket.getAddress().toString().substring(1) + " at " + cal.getTime().toString());
+	    				cal.add(Calendar.SECOND, 30) ; 
+	                  //Loops through the arraylist and removes the client that has not responded for more than 30 seconds.
+	    				for (int i = 0; i < network.size(); i++)
+
+	    				{
+							if(network.get(i).getIP().equals(address) == true)
+
+							{
+
+								network.set(i, new Client(address, cal));
+
+							}
+
+	    					Calendar right_now = Calendar.getInstance();
+	    					
+
+	    					int j = right_now.compareTo(network.get(i).getCal());
+
+	    					if (j == 1)
+
+	    					{
+
+	    						System.out.println("Server did not hear back from the client: " + network.get(i).getIP().getHostAddress());
+	    						System.out.println("Client: " + network.get(i).getIP().getHostAddress() + " is down");
+
+	    					}	
+
+	    				}//for-end
+                	} 
+
+                	catch (IOException ex) 
+
+                	{
+	                    ex.printStackTrace();
+                	}
+                }
+            }
+
+    }).start();
+ }
 
 }
